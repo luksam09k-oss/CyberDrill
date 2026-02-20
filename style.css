@@ -1,0 +1,120 @@
+body {
+    background-color: #1a1a1a; /* Fondo oscuro */
+    color: #00ff00; /* Texto verde clásico de terminal */
+    font-family: 'VT323', monospace; /* Fuente retro */
+    font-size: 1.1em;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden; /* Evita barras de desplazamiento */
+    position: relative;
+}
+
+#terminal-container {
+    width: 90%;
+    max-width: 800px;
+    height: 70vh;
+    border: 2px solid #00ff00;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(0, 0, 0, 0.8); /* Fondo semi-transparente para un toque sutil */
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.7); /* Brillo verde */
+    position: relative;
+    overflow: hidden; /* Para el efecto de scanline */
+}
+
+/* Efecto de scanline (líneas horizontales sutiles) */
+#terminal-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0%,
+            rgba(0, 255, 0, 0.05) 1px,
+            transparent 2px
+        );
+    pointer-events: none; /* Asegura que no interfiera con la interacción */
+}
+
+/* Efecto de glitch sutil */
+#terminal-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(
+            to bottom,
+            rgba(0, 255, 0, 0.05), /* Líneas de glitch muy sutiles */
+            transparent 50%,
+            rgba(0, 255, 0, 0.05) 100%
+        );
+    animation: glitch-anim 10s infinite alternate; /* Animación de glitch */
+    pointer-events: none;
+    opacity: 0.1; /* Muy sutil */
+}
+
+@keyframes glitch-anim {
+    0% { transform: translate(0, 0); }
+    20% { transform: translate(-1px, 1px); }
+    40% { transform: translate(1px, -1px); }
+    60% { transform: translate(-1px, 1px); }
+    80% { transform: translate(1px, -1px); }
+    100% { transform: translate(0, 0); }
+}
+
+
+#terminal-output {
+    flex-grow: 1; /* Ocupa el espacio restante */
+    white-space: pre-wrap; /* Mantiene saltos de línea y espacios */
+    overflow-y: auto; /* Scroll si el contenido es demasiado largo */
+    scrollbar-width: none; /* Oculta la barra de desplazamiento para Firefox */
+    -ms-overflow-style: none;  /* Oculta la barra de desplazamiento para IE/Edge */
+}
+
+#terminal-output::-webkit-scrollbar { /* Oculta la barra de desplazamiento para Chrome/Safari */
+    display: none;
+}
+
+#input-line {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.prompt {
+    margin-right: 5px;
+    color: #00ff00; /* Color del prompt */
+}
+
+#terminal-input {
+    background: transparent;
+    border: none;
+    color: #00ff00; /* Color de texto del input */
+    font-family: 'VT323', monospace;
+    font-size: 1.1em;
+    flex-grow: 1; /* Ocupa el espacio restante */
+    outline: none; /* Elimina el contorno al hacer focus */
+    caret-color: #00ff00; /* Color del cursor */
+}
+
+/* Animación de "escritura" del cursor */
+#terminal-input:focus {
+    animation: blink-caret 1s step-end infinite;
+}
+
+@keyframes blink-caret {
+    from, to { border-right: 0.08em solid transparent }
+    50% { border-right: 0.08em solid #00ff00; }
+}
