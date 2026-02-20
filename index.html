@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CyberDrill: Terminal Lexicon</title>
+    <title>CyberDrill: The Hacker Offensive</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="terminal-container">
         <pre id="terminal-output"></pre>
+        <div id="game-stats" style="display: none;">
+            <span id="player-ram">RAM: [||||||||||]</span> | <span id="enemy-health">SERVER: [----------]</span>
+        </div>
         <div id="input-line">
             <span class="prompt">C:\></span><input type="text" id="terminal-input" autofocus>
         </div>
