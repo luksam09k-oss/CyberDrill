@@ -3,124 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBERDRILL v4.0 - Tactical Overload</title>
+    <title>CYBERDRILL v4.0 - Tactical Interface</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=VT323&display=swap" rel="stylesheet">
-    
-    <style>
-        /* --- AQUÍ ESTÁ EL CSS INTEGRADO --- */
-        :root {
-            --cyan: #00f2ff;
-            --magenta: #ff00ff;
-            --green: #00ff66;
-            --dark: #050508;
-            --glass: rgba(0, 242, 255, 0.05);
-        }
-
-        body {
-            background-color: var(--dark);
-            color: var(--cyan);
-            font-family: 'VT323', monospace;
-            margin: 0;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .scanlines {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%),
-                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            background-size: 100% 3px, 3px 100%;
-            pointer-events: none;
-            z-index: 200;
-        }
-
-        #flash-effect {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--green);
-            opacity: 0;
-            pointer-events: none;
-            z-index: 100;
-        }
-
-        .flash-active { animation: flash-anim 0.3s ease-out; }
-        @keyframes flash-anim { 0% { opacity: 0.5; } 100% { opacity: 0; } }
-
-        #difficulty-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--dark);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 50;
-        }
-
-        .menu-content {
-            text-align: center;
-            border: 2px solid var(--cyan);
-            padding: 40px;
-            background: rgba(0, 0, 0, 0.9);
-            box-shadow: 0 0 30px var(--cyan);
-        }
-
-        .menu-content button {
-            display: block; width: 280px; margin: 15px auto;
-            background: transparent; border: 1px solid var(--cyan);
-            color: var(--cyan); padding: 12px; font-family: 'Orbitron';
-            cursor: pointer; transition: 0.3s;
-        }
-
-        .menu-content button:hover { background: var(--cyan); color: var(--dark); box-shadow: 0 0 20px var(--cyan); }
-
-        .main-wrapper {
-            display: grid;
-            grid-template-columns: 280px 1fr 280px;
-            gap: 20px; width: 95vw; height: 85vh;
-        }
-
-        .panel {
-            background: var(--glass);
-            border: 1px solid var(--cyan);
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
-
-        .header {
-            background: var(--cyan); color: var(--dark);
-            font-family: 'Orbitron'; font-weight: bold;
-            padding: 6px; text-align: center;
-        }
-
-        .img-container { padding: 20px; display: flex; justify-content: center; }
-        .pixel-art { width: 140px; height: 140px; border: 1px solid var(--magenta); background: #111; }
-
-        .hp-bg { background: #111; border: 1px solid var(--cyan); height: 15px; margin: 10px 0; }
-        .hp-fill { background: var(--cyan); height: 100%; width: 100%; transition: width 0.4s; }
-        .hp-fill.player { background: var(--magenta); }
-
-        #timer-ring { position: absolute; top: 10px; right: 20px; font-family: 'Orbitron'; font-size: 2.5rem; color: var(--magenta); }
-        #score-counter { position: absolute; top: 15px; left: 20px; font-family: 'Orbitron'; }
-        #terminal-output { flex: 1; padding: 50px 20px 20px; overflow-y: auto; font-size: 1.4rem; }
-
-        #options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 20px; }
-        .opt-btn {
-            background: rgba(255, 0, 255, 0.05); border: 1px solid var(--magenta);
-            color: var(--magenta); padding: 15px; cursor: pointer; font-family: 'VT323'; font-size: 1.2rem;
-        }
-        .opt-btn:hover { background: var(--magenta); color: white; }
-
-        .input-line { padding: 15px; border-top: 1px solid var(--cyan); display: flex; }
-        #terminal-input { background: transparent; border: none; color: white; font-family: 'VT323'; font-size: 1.2rem; outline: none; width: 100%; }
-
-        .shake { animation: shake-anim 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake-anim { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="scanlines"></div>
@@ -128,7 +13,7 @@
 
     <div id="difficulty-overlay">
         <div class="menu-content">
-            <h1 style="font-family: 'Orbitron';">SELECT_SECURITY_LEVEL</h1>
+            <h1 class="glitch-text">SELECT_SECURITY_LEVEL</h1>
             <button onclick="startGame('easy')">EASY [5_TARGETS]</button>
             <button onclick="startGame('normal')">NORMAL [10_TARGETS]</button>
             <button onclick="startGame('hard')">HARD [ELITE_ENCRYPT]</button>
@@ -137,13 +22,15 @@
     </div>
 
     <div class="main-wrapper" id="game-screen" style="display: none;">
-        <aside class="panel">
+        <aside class="panel side-panel">
             <div class="header">TARGET_DATA</div>
-            <div class="img-container"><img src="server.png" alt="[Server.png]" class="pixel-art"></div>
+            <div class="img-container">
+                <img src="server.png" alt="Server" class="pixel-art" onerror="this.src='https://via.placeholder.com/150/050508/00f2ff?text=SERVER'">
+            </div>
             <div class="info-box">
                 <label>ENEMY SERVER</label>
                 <div class="hp-bg"><div id="enemy-hp" class="hp-fill"></div></div>
-                <small>STATUS: VULNERABLE</small>
+                <small id="enemy-status">STATUS: VULNERABLE</small>
             </div>
         </aside>
 
@@ -153,25 +40,23 @@
             <div id="terminal-output"></div>
             <div id="options-grid"></div>
             <div class="input-line">
-                <span style="color:var(--cyan); margin-right:10px;">>></span>
+                <span class="prompt">SYSTEM@USER:~$</span>
                 <input type="text" id="terminal-input" placeholder="Awaiting..." disabled>
             </div>
         </main>
 
-        <aside class="panel">
+        <aside class="panel side-panel">
             <div class="header">OPERATOR_LOG</div>
-            <div class="img-container"><img src="user.png" alt="[User.png]" class="pixel-art"></div>
+            <div class="img-container">
+                <img src="user.png" alt="Operator" class="pixel-art" onerror="this.src='https://via.placeholder.com/150/050508/ff00ff?text=OPERATOR'">
+            </div>
             <div class="info-box">
                 <label>LOCAL_RAM</label>
                 <div class="hp-bg"><div id="player-hp" class="hp-fill player"></div></div>
-                <small>MEM_STATE: STABLE</small>
+                <small id="player-status">MEM_STATE: STABLE</small>
             </div>
         </aside>
     </div>
-
-    <script>
-        // --- AQUÍ VA TU JAVASCRIPT ---
-        // (Usa el código JS que te pasé anteriormente)
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
