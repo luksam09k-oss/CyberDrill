@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBERDRILL v4.0 - Tactical Interface</title>
+    <title>CYBERDRILL v5.0 - Tactical Interface</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -11,49 +11,56 @@
     <div class="scanlines"></div>
     <div id="flash-effect"></div>
 
+    <!-- PANTALLA DE SELECCIÓN DE DIFICULTAD -->
     <div id="difficulty-overlay">
         <div class="menu-content">
-            <h1 class="glitch-text">SELECT_SECURITY_LEVEL</h1>
-            <button onclick="startGame('easy')">EASY [5_TARGETS]</button>
-            <button onclick="startGame('normal')">NORMAL [10_TARGETS]</button>
-            <button onclick="startGame('hard')">HARD [ELITE_ENCRYPT]</button>
-            <div id="high-score-display">HIGH_SCORE: 0</div>
+            <h1 class="glitch-text">SISTEMA_DE_ENTRENAMIENTO_TÁCTICO</h1>
+            <p style="color: var(--cyan); margin-bottom: 20px;">SELECCIONA NIVEL DE ENCRIPTACIÓN:</p>
+            <button onclick="startGame('easy')">FÁCIL [5_OBJETIVOS]</button>
+            <button onclick="startGame('normal')">NORMAL [10_OBJETIVOS]</button>
+            <button onclick="startGame('hard')">DIFÍCIL [ELITE_LEVEL]</button>
+            <div id="high-score-display">RECORD_ACTUAL: 0</div>
         </div>
     </div>
 
     <div class="main-wrapper" id="game-screen" style="display: none;">
+        <!-- PANEL IZQUIERDO: OBJETIVO -->
         <aside class="panel side-panel">
-            <div class="header">TARGET_DATA</div>
+            <div class="header">DATOS_DEL_OBJETIVO</div>
             <div class="img-container">
                 <img src="server.png" alt="Server" class="pixel-art" onerror="this.src='https://via.placeholder.com/150/050508/00f2ff?text=SERVER'">
             </div>
             <div class="info-box">
-                <label>ENEMY SERVER</label>
+                <label>SERVIDOR ENEMIGO</label>
                 <div class="hp-bg"><div id="enemy-hp" class="hp-fill"></div></div>
-                <small id="enemy-status">STATUS: VULNERABLE</small>
+                <small id="enemy-status">SISTEMA: VULNERABLE</small>
             </div>
         </aside>
 
+        <!-- PANEL CENTRAL: NÚCLEO DE COMANDO -->
         <main class="panel center-panel">
             <div id="timer-ring">10</div>
             <div id="score-counter">PTS: 0</div>
-            <div id="terminal-output"></div>
+            <div id="terminal-wrapper">
+                <div id="terminal-output"></div>
+            </div>
             <div id="options-grid"></div>
             <div class="input-line">
-                <span class="prompt">SYSTEM@USER:~$</span>
-                <input type="text" id="terminal-input" placeholder="Awaiting..." disabled>
+                <span class="prompt">ROOT@USER:~$</span>
+                <input type="text" id="terminal-input" placeholder="Esperando comando..." disabled>
             </div>
         </main>
 
+        <!-- PANEL DERECHO: OPERADOR -->
         <aside class="panel side-panel">
-            <div class="header">OPERATOR_LOG</div>
+            <div class="header">LOG_DEL_OPERADOR</div>
             <div class="img-container">
-                <img src="user.png" alt="Operator" class="pixel-art" onerror="this.src='https://via.placeholder.com/150/050508/ff00ff?text=OPERATOR'">
+                <img src="user.png" alt="Operator" class="pixel-art" onerror="this.src='https://via.placeholder.com/150/050508/ff00ff?text=USER'">
             </div>
             <div class="info-box">
-                <label>LOCAL_RAM</label>
+                <label>MEMORIA RAM LOCAL</label>
                 <div class="hp-bg"><div id="player-hp" class="hp-fill player"></div></div>
-                <small id="player-status">MEM_STATE: STABLE</small>
+                <small id="player-status">ESTADO: ESTABLE</small>
             </div>
         </aside>
     </div>
