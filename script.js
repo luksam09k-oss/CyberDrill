@@ -1,85 +1,92 @@
 const vocabulary = [
-    { q: "Hacker que trabaja para gobiernos en ciberguerra:", options: ["White Hat", "State-Sponsored", "Script Kiddie", "Blue Hat"], a: 1 },
-    { q: "Usa herramientas de otros porque no sabe programar:", options: ["Hacktivist", "Grey Hat", "Script Kiddie", "Black Hat"], a: 2 },
-    { q: "Ataca por motivos políticos o sociales:", options: ["Hacktivist", "Spy", "White Hat", "Insider"], a: 0 },
-    { q: "Experto contratado para buscar fallos antes de un lanzamiento:", options: ["Black Hat", "Blue Hat", "Grey Hat", "Red Hat"], a: 1 }
+    { q: "Software malicioso diseñado para replicarse y dañar archivos:", options: ["Firewall", "Virus", "VPN", "Cloud"], a: 1 },
+    { q: "Barrera de seguridad que filtra el tráfico de red entrante/saliente:", options: ["Router", "Phishing", "Firewall", "Modem"], a: 2 },
+    { q: "Hacker ético que busca vulnerabilidades para reportarlas:", options: ["Black Hat", "Grey Hat", "White Hat", "Script Kiddie"], a: 2 },
+    { q: "Engaño mediante correos falsos para robar credenciales:", options: ["Phishing", "Spyware", "Trojan", "DDoS"], a: 0 },
+    { q: "Malware que se disfraza de software legítimo:", options: ["Worm", "Trojan", "Ransomware", "Adware"], a: 1 },
+    { q: "Secuestro de datos por los que se pide un rescate económico:", options: ["Spam", "Ransomware", "Keylogger", "Botnet"], a: 1 },
+    { q: "Crea un túnel seguro y cifrado para la navegación:", options: ["DNS", "VPN", "HTTP", "FTP"], a: 1 },
+    { q: "Novato que usa scripts hechos por otros sin entenderlos:", options: ["Hacktivist", "Blue Hat", "Script Kiddie", "SysAdmin"], a: 2 },
+    { q: "Ataque masivo que satura un servidor con tráfico falso:", options: ["DDoS", "SQLi", "XSS", "Brute Force"], a: 0 },
+    { q: "Persona que hackea por motivos políticos o sociales:", options: ["Phreaker", "Hacktivist", "Cracker", "Insider"], a: 1 }
 ];
 
-let pLife = 100, eLife = 100, timeLeft = 10, timerInterval, currentQ = 0;
+let playerRAM = 100, enemyHP = 100, currentQ = {}, timer, timeLeft = 10;
 
-function updateUI() {
-    document.getElementById('player-bar').style.width = pLife + "%";
-    document.getElementById('enemy-bar').style.width = eLife + "%";
-    if(pLife <= 0) alert("CRITICAL FAILURE: System Offline");
-    if(eLife <= 0) alert("BREACH SUCCESSFUL: Server Compromised");
+function log(msg, color) {
+    const out = document.getElementById('terminal-output');
+    const line = document.createElement('div');
+    line.style.color = color === 'err' ? 'var(--magenta)' : 'var(--cyan)';
+    line.innerHTML = `> ${msg}`;
+    out.appendChild(line);
+    out.scrollTop = out.scrollHeight;
+}
+
+function updateBars() {
+    document.getElementById('player-hp').style.width = playerRAM + "%";
+    document.getElementById('enemy-hp').style.width = enemyHP + "%";
 }
 
 function startTimer() {
     timeLeft = 10;
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
+    document.getElementById('timer-ring').innerText = timeLeft;
+    clearInterval(timer);
+    timer = setInterval(() => {
         timeLeft--;
-        document.getElementById('timer-display').innerText = timeLeft + "s";
+        document.getElementById('timer-ring').innerText = timeLeft;
         if (timeLeft <= 0) {
-            takeDamage(20, "TIME EXPIRED: Virus Injected!");
-            nextQuestion();
+            handleDamage(20, "TIMEOUT: Sitema infectado por retraso.");
+            loadQuestion();
         }
     }, 1000);
 }
 
-function takeDamage(amount, msg) {
-    pLife -= amount;
-    log(msg, "error");
-    updateUI();
+function handleDamage(dmg, msg) {
+    playerRAM -= dmg;
+    document.getElementById('game-screen').classList.add('shake');
+    setTimeout(() => document.getElementById('game-screen').classList.remove('shake'), 500);
+    log(msg, "err");
+    updateBars();
+    if (playerRAM <= 0) endGame("SISTEMA CRASHED. GAME OVER.");
 }
 
-function doDamage(amount, msg) {
-    eLife -= amount;
-    log(msg, "success");
-    updateUI();
+function handleAttack(dmg, msg) {
+    enemyHP -= dmg;
+    log(msg, "ok");
+    updateBars();
+    if (enemyHP <= 0) endGame("SERVIDOR COMPROMETIDO. VICTORIA.");
 }
 
-function log(msg, type) {
-    const div = document.createElement('div');
-    div.innerText = `> ${msg}`;
-    div.className = type;
-    const output = document.getElementById('terminal-output');
-    output.appendChild(div);
-    output.scrollTop = output.scrollHeight;
-}
-
-function nextQuestion() {
-    currentQ = Math.floor(Math.random() * vocabulary.length);
-    const qData = vocabulary[currentQ];
-    log(qData.q, "system");
+function loadQuestion() {
+    if (playerRAM <= 0 || enemyHP <= 0) return;
+    currentQ = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+    log(currentQ.q, "ok");
     
-    const container = document.getElementById('options-container');
-    container.innerHTML = '';
-    qData.options.forEach((opt, idx) => {
+    const grid = document.getElementById('options-grid');
+    grid.innerHTML = '';
+    currentQ.options.forEach((opt, i) => {
         const btn = document.createElement('button');
         btn.className = 'opt-btn';
-        btn.innerText = `${idx + 1}. ${opt}`;
-        btn.onclick = () => checkAnswer(idx);
-        container.appendChild(btn);
+        btn.innerText = opt;
+        btn.onclick = () => {
+            if (i === currentQ.a) {
+                handleAttack(25, "ATAQUE EXITOSO: Buffer overflow detectado.");
+            } else {
+                handleDamage(15, "ERROR: Firewall enemigo detectado.");
+            }
+            loadQuestion();
+        };
+        grid.appendChild(btn);
     });
     startTimer();
 }
 
-function checkAnswer(idx) {
-    if (idx === vocabulary[currentQ].a) {
-        doDamage(25, "CORRECT: Data packet sent!");
-    } else {
-        takeDamage(15, "WRONG: Firewall backfire!");
-    }
-    nextQuestion();
+function endGame(msg) {
+    clearInterval(timer);
+    document.body.innerHTML = `<h1 style="color:var(--magenta); font-family:Orbitron; text-align:center; width:100%; mt-50">${msg}</h1>
+                               <button onclick="location.reload()" style="background:none; border:1px solid var(--cyan); color:var(--cyan); padding:20px; font-family:VT323; cursor:pointer;">REBOOT SYSTEM</button>`;
 }
 
-function log(msg, type) {
-    const out = document.getElementById('terminal-output');
-    out.innerHTML += `<div style="color:${type === 'error' ? '#ff00ff' : '#00f2ff'}">> ${msg}</div>`;
-    out.scrollTop = out.scrollHeight;
-}
-
-// Iniciar
-updateUI();
-nextQuestion();
+// Inicializar
+updateBars();
+loadQuestion();
