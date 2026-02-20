@@ -1,57 +1,66 @@
 const terminalOutput = document.getElementById('terminal-output');
 const terminalInput = document.getElementById('terminal-input');
 const promptSpan = document.querySelector('.prompt');
+const gameStatsDiv = document.getElementById('game-stats');
+const playerRamSpan = document.getElementById('player-ram');
+const enemyHealthSpan = document.getElementById('enemy-health');
 
 let currentCommand = '';
 let commandHistory = [];
 let historyIndex = -1;
-let currentState = 'login'; // 'login', 'menu', 'quiz'
-let currentCategory = '';
+let currentState = 'login'; // 'login', 'menu', 'attack'
+let currentTarget = ''; // Aquí será el "servidor" a atacar
 let currentQuestionIndex = 0;
 
-// Definición de preguntas y respuestas
+// === NUEVAS VARIABLES DE JUEGO ===
+let playerRAM = 10; // Vida del jugador
+let enemyHealth = 10; // Vida del servidor enemigo
+const RAM_DAMAGE = 2; // Cuánta RAM pierdes por respuesta incorrecta
+const SERVER_DAMAGE = 2; // Cuánto daño haces al servidor por respuesta correcta
+const MAX_RAM = 10; // RAM máxima del jugador
+const MAX_ENEMY_HEALTH = 10; // Salud máxima del servidor
+
+// === VOCABULARIO DE HACKERS ===
 const vocabulary = {
-    'NETWORK_PROTOCOLS': [
-        { q: "What is the acronym for HyperText Transfer Protocol?", a: "HTTP" },
-        { q: "Which protocol is used to send email?", a: "SMTP" },
-        { q: "What does TCP stand for?", a: "Transmission Control Protocol" },
-        { q: "What is the secure version of HTTP?", a: "HTTPS" },
-        { q: "Which protocol resolves domain names to IP addresses?", a: "DNS" }
-    ],
-    'DATA_STRUCTURES': [
-        { q: "A collection of elements where items are added and removed from the same end (Last-In, First-Out).", a: "Stack" },
-        { q: "A linear collection of elements where items are added at one end and removed from the other (First-In, First-Out).", a: "Queue" },
-        { q: "What is a node with no children called in a tree structure?", a: "Leaf" },
-        { q: "A data structure that maps keys to values.", a: "Hash Map" },
-        { q: "A collection of nodes connected by edges.", a: "Graph" }
-    ],
-    'OPERATING_SYSTEMS': [
-        { q: "What is the core part of an operating system?", a: "Kernel" },
-        { q: "What is the process of loading the OS into memory called?", a: "Booting" },
-        { q: "What does GUI stand for?", a: "Graphical User Interface" },
-        { q: "A small program that allows communication between hardware and the OS.", a: "Driver" },
-        { q: "The management of computer memory, which involves allocating and deallocating memory space.", a: "Memory Management" }
+    'HACKER_TYPES': [
+        { q: "A person who exploits computer security for malicious reasons, often for personal gain.", a: "Black Hat" },
+        { q: "A security professional who uses their skills to identify vulnerabilities and improve security.", a: "White Hat" },
+        { q: "Someone who operates in a grey area, sometimes breaking laws but not necessarily with malicious intent.", a: "Grey Hat" },
+        { q: "An individual who uses hacking to promote a political or social cause.", a: "Hacktivist" },
+        { q: "A novice who uses pre-existing tools or scripts to hack, lacking deep technical understanding.", a: "Script Kiddie" },
+        { q: "A security expert hired to test a system for vulnerabilities before launch, often by trying to break it.", a: "Blue Hat" },
+        { q: "Someone employed by a government to conduct cyber warfare or espionage.", a: "State-Sponsored Hacker" },
+        { q: "An insider threat, often disgruntled, who uses their access for malicious purposes.", a: "Malicious Insider" }
     ]
+    // Puedes añadir más categorías de vocabulario aquí en el futuro
 };
+
+// === FUNCIONES DE UI / ESTADO DEL JUEGO ===
 
 function appendOutput(text, type = 'normal') {
     const p = document.createElement('span');
     p.textContent = text;
-    if (type === 'error') p.style.color = '#ff0000'; // Rojo para errores
-    if (type === 'success') p.style.color = '#00ff00'; // Verde más brillante para éxito
+    if (type === 'error') p.style.color = '#ff0000';
+    if (type === 'success') p.style.color = '#00ff00';
     if (type === 'system') p.style.color = '#00ffff'; // Cyan para mensajes del sistema
+    if (type === 'warning') p.style.color = '#ffff00'; // Amarillo para advertencias
     terminalOutput.appendChild(p);
     terminalOutput.appendChild(document.createElement('br'));
-    terminalOutput.scrollTop = terminalOutput.scrollHeight; // Auto-scroll
+    terminalOutput.scrollTop = terminalOutput.scrollHeight;
 }
 
 function typeWriterEffect(text, callback, delay = 50) {
     let i = 0;
     terminalInput.disabled = true;
+    terminalOutput.appendChild(document.createElement('br')); // Añade un salto de línea antes del efecto
+    const currentLine = document.createElement('span');
+    terminalOutput.appendChild(currentLine);
+
     function type() {
         if (i < text.length) {
-            appendOutput(text.charAt(i), 'system');
+            currentLine.textContent += text.charAt(i);
             i++;
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
             setTimeout(type, delay);
         } else {
             terminalInput.disabled = false;
@@ -62,8 +71,41 @@ function typeWriterEffect(text, callback, delay = 50) {
     type();
 }
 
+// Actualiza las barras de vida/RAM en la interfaz
+function updateGameStats() {
+    gameStatsDiv.style.display = 'block'; // Asegúrate de que las estadísticas sean visibles
+
+    const ramBar = Array(MAX_RAM).fill('-').map((char, i) => i < playerRAM ? '|' : char).join('');
+    playerRamSpan.textContent = `RAM: [${ramBar}]`;
+
+    const serverBar = Array(MAX_ENEMY_HEALTH).fill('-').map((char, i) => i < enemyHealth ? '#' : char).join('');
+    enemyHealthSpan.textContent = `SERVER: [${serverBar}]`;
+
+    // Si la RAM es baja, cambia el color de la barra (ej. amarillo)
+    if (playerRAM <= MAX_RAM / 3) {
+        playerRamSpan.style.color = '#ffff00'; // Amarillo
+    } else {
+        playerRamSpan.style.color = '#00ffff'; // Cian normal
+    }
+
+    // Si la salud del enemigo es baja, cambia el color de la barra (ej. rojo)
+    if (enemyHealth <= MAX_ENEMY_HEALTH / 3) {
+        enemyHealthSpan.style.color = '#ff0000'; // Rojo
+    } else {
+        enemyHealthSpan.style.color = '#00ffff'; // Cian normal
+    }
+}
+
+function resetGame() {
+    playerRAM = MAX_RAM;
+    enemyHealth = MAX_ENEMY_HEALTH;
+    currentQuestionIndex = 0;
+    updateGameStats();
+}
+
 function displayLogin() {
-    terminalOutput.innerHTML = ''; // Limpiar la pantalla
+    terminalOutput.innerHTML = '';
+    gameStatsDiv.style.display = 'none'; // Ocultar estadísticas en el login
     appendOutput("C:\\> attempting secure login...");
     typeWriterEffect("C:\\> authentication required. enter credentials.", () => {
         appendOutput("USERNAME: guest");
@@ -75,50 +117,79 @@ function displayLogin() {
 
 function displayMenu() {
     terminalOutput.innerHTML = '';
+    gameStatsDiv.style.display = 'none'; // Ocultar estadísticas en el menú
     appendOutput("C:\\> login successful. welcome, agent.");
     appendOutput("");
-    appendOutput("CYBERDRILL: TERMINAL LEXICON");
-    appendOutput("----------------------------");
-    appendOutput("TARGETS AVAILABLE:");
-    let i = 1;
-    for (const category in vocabulary) {
-        appendOutput(`${i}. ${category}.exe`);
-        i++;
-    }
+    appendOutput("CYBERDRILL: THE HACKER OFFENSIVE");
+    appendOutput("--------------------------------");
+    appendOutput("ENEMY SERVERS DETECTED:");
+    appendOutput("1. HACKER_TYPES.exe (Threat Level: HIGH)");
     appendOutput("");
-    appendOutput("C:\\> select a target [1-${Object.keys(vocabulary).length}] or 'exit'");
+    appendOutput("C:\\> select target [1] or 'exit'");
     terminalInput.placeholder = "";
     currentState = 'menu';
 }
 
-function startQuiz(category) {
+function startAttack(target) {
     terminalOutput.innerHTML = '';
-    currentCategory = category;
-    currentQuestionIndex = 0;
-    appendOutput(`C:\\> accessing ${category}.exe ...`);
-    appendOutput("C:\\> system compromise initiated. answer the following:");
-    displayQuestion();
-    currentState = 'quiz';
+    currentTarget = target;
+    resetGame(); // Reinicia el estado del juego al iniciar un ataque
+    
+    appendOutput(`C:\\> initiating attack on ${target}.exe ...`);
+    typeWriterEffect("C:\\> breach protocol activated. respond swiftly to neutralize defense systems.", () => {
+        displayQuestion();
+        currentState = 'attack';
+    });
 }
 
 function displayQuestion() {
-    if (currentQuestionIndex < vocabulary[currentCategory].length) {
-        const qData = vocabulary[currentCategory][currentQuestionIndex];
-        appendOutput(`\nQUESTION ${currentQuestionIndex + 1}/${vocabulary[currentCategory].length}:`);
+    // Comprobar si el juego ha terminado
+    if (playerRAM <= 0) {
+        gameOver("C:\\> YOUR SYSTEM CRASHED! DEFEAT! GAME OVER!");
+        return;
+    }
+    if (enemyHealth <= 0) {
+        gameOver("C:\\> ENEMY SERVER COMPROMISED! VICTORY! RETURNING TO MENU...");
+        return;
+    }
+
+    // Si hay más preguntas
+    const questions = vocabulary[currentTarget];
+    if (currentQuestionIndex < questions.length) {
+        const qData = questions[currentQuestionIndex];
+        appendOutput(`\nC:\\> ATTEMPTING PROTOCOL BREACH ${currentQuestionIndex + 1}/${questions.length}:`);
         appendOutput(qData.q);
         terminalInput.placeholder = "your answer...";
-        promptSpan.textContent = `C:\\${currentCategory}>`;
+        promptSpan.textContent = `C:\\${currentTarget}>`;
     } else {
-        appendOutput("\nC:\\> TARGET COMPROMISED! CATEGORY CLEARED!");
-        appendOutput("C:\\> returning to main menu in 3 seconds...");
-        promptSpan.textContent = "C:\\>";
-        setTimeout(displayMenu, 3000);
+        // Si todas las preguntas de la categoría han sido respondidas pero el enemigo no ha muerto
+        appendOutput("\nC:\\> ALL KNOWN VULNERABILITIES EXHAUSTED. ENEMY STILL ACTIVE.");
+        appendOutput("C:\\> RE-SCANNING FOR NEW EXPLOITS...");
+        currentQuestionIndex = 0; // Reinicia las preguntas para seguir atacando
+        setTimeout(displayQuestion, 2000);
     }
+    updateGameStats(); // Actualiza las estadísticas después de mostrar la pregunta
 }
 
+function gameOver(message) {
+    terminalOutput.innerHTML = '';
+    appendOutput(message, message.includes("VICTORY") ? 'success' : 'error');
+    appendOutput("\nC:\\> REBOOTING SYSTEM...");
+    terminalInput.disabled = true;
+    promptSpan.textContent = "C:\\>";
+    setTimeout(() => {
+        displayLogin(); // O volver al menú principal directamente
+        terminalInput.disabled = false;
+        terminalInput.focus();
+    }, 4000);
+}
+
+
+// === PROCESAMIENTO DE COMANDOS ===
+
 function processCommand(command) {
-    appendOutput(promptSpan.textContent + command); // Muestra el comando del usuario
-    terminalInput.value = ''; // Limpia el input
+    appendOutput(promptSpan.textContent + command);
+    terminalInput.value = '';
 
     if (currentState === 'login') {
         if (command.toLowerCase() === 'login') {
@@ -129,30 +200,32 @@ function processCommand(command) {
             appendOutput("C:\\> re-attempting login...");
         }
     } else if (currentState === 'menu') {
-        const categoryKeys = Object.keys(vocabulary);
         if (command.toLowerCase() === 'exit') {
             appendOutput("C:\\> disconnecting. goodbye, agent.");
             setTimeout(displayLogin, 1000);
-        } else if (!isNaN(command) && parseInt(command) > 0 && parseInt(command) <= categoryKeys.length) {
-            const selectedCategory = categoryKeys[parseInt(command) - 1];
-            startQuiz(selectedCategory);
+        } else if (command === '1') { // Solo tenemos un objetivo por ahora
+            startAttack('HACKER_TYPES');
         } else {
-            appendOutput("C:\\> unknown command or invalid target ID. type a number or 'exit'.", 'error');
+            appendOutput("C:\\> unknown command or invalid target ID. type '1' or 'exit'.", 'error');
         }
-    } else if (currentState === 'quiz') {
-        const currentQ = vocabulary[currentCategory][currentQuestionIndex];
+    } else if (currentState === 'attack') {
+        const currentQ = vocabulary[currentTarget][currentQuestionIndex];
         if (command.toLowerCase() === currentQ.a.toLowerCase()) {
-            appendOutput("C:\\> ACCESS GRANTED! Correct!", 'success');
+            appendOutput("C:\\> PROTOCOL BREACH SUCCESSFUL! ENEMY SYSTEM DAMAGED!", 'success');
+            enemyHealth = Math.max(0, enemyHealth - SERVER_DAMAGE); // Reduce vida, no menos de 0
             currentQuestionIndex++;
-            setTimeout(displayQuestion, 1000);
+            setTimeout(displayQuestion, 1500);
         } else {
-            appendOutput("C:\\> DENIED. Incorrect answer. Try again.", 'error');
-            appendOutput(`HINT: The answer was "${currentQ.a}".`, 'error'); // Opcional: dar la respuesta para aprender
-            // Podríamos reiniciar la pregunta o dar una pista, por ahora solo le damos la respuesta.
-            setTimeout(displayQuestion, 1500); // Dar un momento para leer la pista
+            appendOutput("C:\\> BREACH ATTEMPT FAILED! ENEMY COUNTER-ATTACK! RAM COMPROMISED!", 'error');
+            playerRAM = Math.max(0, playerRAM - RAM_DAMAGE); // Reduce RAM, no menos de 0
+            // No incrementamos currentQuestionIndex para que el usuario pueda intentar de nuevo la misma pregunta
+            setTimeout(displayQuestion, 2000); // Dar un momento para leer el mensaje de error
         }
     }
 }
+
+
+// === EVENT LISTENERS ===
 
 terminalInput.addEventListener('keydown', function(event) {
     if (event.key === 'Enter') {
@@ -166,7 +239,7 @@ terminalInput.addEventListener('keydown', function(event) {
         if (historyIndex > 0) {
             historyIndex--;
             terminalInput.value = commandHistory[historyIndex];
-            event.preventDefault(); // Previene que el cursor se mueva al inicio
+            event.preventDefault();
         }
     } else if (event.key === 'ArrowDown') {
         if (historyIndex < commandHistory.length - 1) {
