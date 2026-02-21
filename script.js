@@ -21,12 +21,38 @@ const vocabulary = [
     { q: "Inyección de código malicioso en BD:", o: ["XSS", "SQLi", "CSRF", "MITM"], a: 1 }
 ];
 
+// Gestión de Audio
+const audio = {
+    bg: new Audio('fondo.mp3'),
+    berserker: new Audio('bersek.mp3'),
+    void: new Audio('void.mp3'),
+    correct: new Audio('correcto.mp3'),
+    wrong: new Audio('incorrecto.mp3')
+};
+
+// Configuración de bucles
+audio.bg.loop = true;
+audio.berserker.loop = true;
+audio.void.loop = true;
+
+function stopAllMusic() {
+    audio.bg.pause();
+    audio.berserker.pause();
+    audio.void.pause();
+}
+
+function playMusic(track) {
+    stopAllMusic();
+    audio[track].currentTime = 0;
+    audio[track].play().catch(e => console.log("Audio play blocked by browser. Interaction needed."));
+}
+
 let playerRAM = 100, enemyHP = 100, score = 0, timer, timeLeft = 10;
 let config = { mode: 'normal', time: 10, enemyMult: 1, overloadProb: 0.4 };
 let usedQuestions = [];
 let isOverload = false;
 let isVoid = false;
-let perfectBerserker = true; // Racha perfecta en modo Berserker
+let perfectBerserker = true;
 
 window.onload = () => {
     const savedScore = localStorage.getItem('cyberdrill_score') || 0;
@@ -37,6 +63,8 @@ function startGame(mode) {
     document.getElementById('difficulty-overlay').style.display = 'none';
     document.getElementById('game-screen').style.display = 'grid';
     
+    playMusic('bg'); // Inicia música normal
+
     config.mode = mode;
     if (mode === 'easy') {
         config.time = 12; config.overloadProb = 0.1;
@@ -82,14 +110,16 @@ function loadQuestion() {
         btn.onclick = () => {
             if (i === qData.a) {
                 log("INYECCIÓN EXITOSA.", "ok");
+                if (!isVoid) audio.correct.play().catch(() => {}); // Sin SFX en Void
                 successEffect();
                 enemyHP -= (25 / config.enemyMult);
                 score += (isVoid ? 500 : (isOverload ? 200 : 100));
             } else {
                 log("DEFENSA ENEMIGA ACTIVA.", "err");
+                if (!isVoid) audio.wrong.play().catch(() => {}); // Sin SFX en Void
                 damageEffect();
                 playerRAM -= (isVoid ? 50 : (isOverload ? 25 : 15));
-                if (isOverload) perfectBerserker = false; // Adiós racha perfecta
+                if (isOverload) perfectBerserker = false;
             }
             checkGameState();
         };
@@ -119,6 +149,7 @@ function startTimer() {
         document.getElementById('timer-ring').innerText = timeLeft;
         if (timeLeft <= 0) {
             log("TIMEOUT. Rastreo completado por el enemigo.", "err");
+            if (!isVoid) audio.wrong.play().catch(() => {});
             damageEffect();
             playerRAM -= (isVoid ? 50 : (isOverload ? 30 : 20));
             if (isOverload) perfectBerserker = false;
@@ -129,10 +160,12 @@ function startTimer() {
 
 function activateOverload() {
     isOverload = true;
-    perfectBerserker = true; // Empezamos a contar
+    perfectBerserker = true;
     enemyHP = 100;
     config.enemyMult = 1.5;
     
+    playMusic('berserker'); // Música de Berserker
+
     document.getElementById('main-body').classList.add('blood-mode');
     document.getElementById('enemy-sprite').src = 'final.png';
     document.getElementById('user-sprite').src = 'scared.png';
@@ -144,9 +177,11 @@ function activateOverload() {
 function activateVoid() {
     isVoid = true;
     isOverload = false;
-    enemyHP = 300; // Vida del modo secreto multiplicada por 2 (antes era 150)
+    enemyHP = 300;
     config.enemyMult = 2;
     
+    playMusic('void'); // Música del Vacío
+
     document.getElementById('main-body').className = 'void-mode';
     document.getElementById('enemy-sprite').src = 'secret.jpg';
     document.getElementById('enemy-sprite').onerror = () => {
@@ -185,15 +220,10 @@ function checkGameState() {
 }
 
 function updateBars() {
-    // Corregido el error de cálculo de porcentajes en las barras
     let maxE;
-    if (isVoid) {
-        maxE = 300;
-    } else if (isOverload) {
-        maxE = 100;
-    } else {
-        maxE = (config.mode === 'hard') ? 200 : 100;
-    }
+    if (isVoid) maxE = 300;
+    else if (isOverload) maxE = 100;
+    else maxE = (config.mode === 'hard') ? 200 : 100;
     
     const currentMaxP = (config.mode === 'hard') ? 50 : 100;
     
@@ -203,6 +233,7 @@ function updateBars() {
 
 function endGame(msg) {
     clearInterval(timer);
+    stopAllMusic(); // Detener toda la música al final
     const high = localStorage.getItem('cyberdrill_score') || 0;
     if (score > high) localStorage.setItem('cyberdrill_score', score);
     
