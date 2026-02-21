@@ -144,7 +144,7 @@ function activateOverload() {
 function activateVoid() {
     isVoid = true;
     isOverload = false;
-    enemyHP = 150;
+    enemyHP = 300; // Vida del modo secreto multiplicada por 2 (antes era 150)
     config.enemyMult = 2;
     
     document.getElementById('main-body').className = 'void-mode';
@@ -185,7 +185,16 @@ function checkGameState() {
 }
 
 function updateBars() {
-    const maxE = isVoid ? 150 : ((config.mode === 'hard' && !isOverload) ? 200 : 100);
+    // Corregido el error de cálculo de porcentajes en las barras
+    let maxE;
+    if (isVoid) {
+        maxE = 300;
+    } else if (isOverload) {
+        maxE = 100;
+    } else {
+        maxE = (config.mode === 'hard') ? 200 : 100;
+    }
+    
     const currentMaxP = (config.mode === 'hard') ? 50 : 100;
     
     document.getElementById('enemy-hp').style.width = Math.max(0, (enemyHP / maxE) * 100) + "%";
