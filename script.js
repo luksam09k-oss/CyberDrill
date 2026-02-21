@@ -22,9 +22,9 @@ const vocabulary = [
 ];
 
 let playerRAM = 100, enemyHP = 100, score = 0, timer, timeLeft = 10;
-let config = { time: 10, enemyMult: 1 };
+let config = { mode: 'normal', time: 10, enemyMult: 1, overloadProb: 0.4 };
 let usedQuestions = [];
-let isOverload = false; // Estado del Boss Final
+let isOverload = false;
 
 window.onload = () => {
     const savedScore = localStorage.getItem('cyberdrill_score') || 0;
@@ -35,10 +35,13 @@ function startGame(mode) {
     document.getElementById('difficulty-overlay').style.display = 'none';
     document.getElementById('game-screen').style.display = 'grid';
     
-    if (mode === 'easy') config = { time: 12, enemyMult: 1 };
-    else if (mode === 'normal') config = { time: 10, enemyMult: 1 };
-    else if (mode === 'hard') {
-        config = { time: 8, enemyMult: 2 };
+    config.mode = mode;
+    if (mode === 'easy') {
+        config.time = 12; config.enemyMult = 1; config.overloadProb = 0.1;
+    } else if (mode === 'normal') {
+        config.time = 10; config.enemyMult = 1; config.overloadProb = 0.4;
+    } else if (mode === 'hard') {
+        config.time = 8; config.enemyMult = 2; config.overloadProb = 0.8; // Probabilidad aumentada
         playerRAM = 50;
         enemyHP = 200;
     }
@@ -59,7 +62,6 @@ function log(msg, type) {
 
 function loadQuestion() {
     clearInterval(timer);
-    
     if (usedQuestions.length === vocabulary.length) usedQuestions = [];
     
     let qIdx;
@@ -127,23 +129,32 @@ function startTimer() {
 
 function activateOverload() {
     isOverload = true;
-    enemyHP = 100; // Revive al 100%
-    config.enemyMult = 1.5; // Un poco más duro de bajar
+    enemyHP = 100;
+    config.enemyMult = 1.5;
     
-    // Cambios visuales
     document.getElementById('main-body').classList.add('blood-mode');
+    
+    // Cambios de imagen
     document.getElementById('enemy-sprite').src = 'final.png';
+    document.getElementById('user-sprite').src = 'scared.png'; // Operador asustado
+    
+    // Fallbacks
     document.getElementById('enemy-sprite').onerror = () => {
         document.getElementById('enemy-sprite').src = 'https://via.placeholder.com/150/1a0005/ff0033?text=BOSS_CORE';
     };
-    document.getElementById('enemy-status').innerText = "SISTEMA: SOBRECARGADO / MODO_BERSERKER";
+    document.getElementById('user-sprite').onerror = () => {
+        document.getElementById('user-sprite').src = 'https://via.placeholder.com/150/1a0005/ff0033?text=PANIC';
+    };
+
+    document.getElementById('enemy-status').innerText = "SISTEMA: SOBRECARGADO / BERSERKER";
     document.getElementById('enemy-label').innerText = "NÚCLEO_CORRUPTO";
+    document.getElementById('player-status').innerText = "ESTADO: PÁNICO CRÍTICO";
     
-    log("!!! ADVERTENCIA: PROTOCOLO DE AUTODESTRUCCIÓN ACTIVADO !!!", "warn");
-    log("EL SERVIDOR ESTÁ INTENTANDO RECONECTARSE...", "warn");
+    log("!!! ADVERTENCIA: SOBRECARGA DEL NÚCLEO DETECTADA !!!", "warn");
+    log("ERROR: EL OPERADOR HA PERDIDO EL CONTROL.", "err");
     
     setTimeout(() => {
-        log("SISTEMA ENEMIGO REVIVIDO. TIEMPO DE RESPUESTA REDUCIDO.", "err");
+        log("SISTEMA ENEMIGO REVIVIDO. TIEMPO DE RESPUESTA: 6s.", "err");
         updateBars();
         loadQuestion();
     }, 1500);
@@ -153,14 +164,14 @@ function checkGameState() {
     updateBars();
     document.getElementById('score-counter').innerText = `PTS: ${score}`;
     
-    if (playerRAM <= 0) return endGame("CONEXIÓN_CORTADA: Sistema local destruido.");
+    if (playerRAM <= 0) return endGame("CONEXIÓN_CORTADA: Tu hardware ha explotado.");
     
     if (enemyHP <= 0) {
-        if (!isOverload && Math.random() < 0.4) {
-            clearInterval(timer); // Pausamos para la transformación
+        if (!isOverload && Math.random() < config.overloadProb) {
+            clearInterval(timer);
             activateOverload();
         } else {
-            endGame(isOverload ? "NÚCLEO_EXTERMINADO: Eres una leyenda del hacking." : "SERVIDOR_CONQUISTADO: Acceso total garantizado.");
+            endGame(isOverload ? "NÚCLEO_EXTERMINADO: Eres el terror de los servidores." : "SERVIDOR_CONQUISTADO: Acceso garantizado.");
         }
     } else {
         loadQuestion();
@@ -168,11 +179,11 @@ function checkGameState() {
 }
 
 function updateBars() {
-    const maxE = config.enemyMult === 2 ? 200 : (isOverload ? 100 : 100);
-    const maxP = 100; // Referencia base
+    const maxE = (config.mode === 'hard' && !isOverload) ? 200 : 100;
+    const currentMaxP = (config.mode === 'hard') ? 50 : 100;
     
     document.getElementById('enemy-hp').style.width = Math.max(0, (enemyHP / maxE) * 100) + "%";
-    document.getElementById('player-hp').style.width = Math.max(0, (playerRAM / (config.enemyMult === 2 ? 50 : 100)) * 100) + "%";
+    document.getElementById('player-hp').style.width = Math.max(0, (playerRAM / currentMaxP) * 100) + "%";
 }
 
 function endGame(msg) {
