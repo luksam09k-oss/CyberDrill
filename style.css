@@ -4,6 +4,7 @@
     --green: #00ff66;
     --red: #ff0033;
     --dark: #050508;
+    --white: #ffffff;
     --glass: rgba(0, 242, 255, 0.05);
 }
 
@@ -14,21 +15,57 @@ body {
     margin: 0;
     overflow: hidden;
     height: 100vh;
-    transition: background-color 0.5s ease;
+    transition: all 0.3s ease;
 }
 
-/* MODO ALERTA ROJA */
+/* --- MODO BERSERKER (RED ALERTA) --- */
 body.blood-mode {
     --cyan: var(--red);
-    --glass: rgba(255, 0, 51, 0.1);
+    --glass: rgba(255, 0, 51, 0.15);
     background-color: #1a0005;
 }
 
-body.blood-mode .scanlines {
-    background: linear-gradient(rgba(255, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.2) 50%);
+body.blood-mode .panel {
+    animation: constant-vibrate 0.2s infinite;
+    box-shadow: 0 0 15px var(--red);
 }
 
-/* Efectos de Pantalla */
+/* --- MODO VACÍO (SECRET) --- */
+body.void-mode {
+    --cyan: var(--white);
+    --magenta: var(--red);
+    --dark: #000000;
+    --glass: rgba(255, 255, 255, 0.05);
+    background-color: #000 !important;
+}
+
+body.void-mode .panel {
+    border: 2px solid var(--white) !important;
+    box-shadow: 0 0 20px var(--red);
+    animation: void-glitch 0.15s infinite;
+}
+
+body.void-mode .header {
+    background: var(--red) !important;
+    color: var(--white) !important;
+}
+
+/* Animaciones */
+@keyframes constant-vibrate {
+    0% { transform: translate(0); }
+    25% { transform: translate(1px, 1px); }
+    50% { transform: translate(-1px, -1px); }
+    75% { transform: translate(1px, -1px); }
+    100% { transform: translate(0); }
+}
+
+@keyframes void-glitch {
+    0% { filter: invert(0); transform: skew(0); }
+    20% { filter: invert(0.1); transform: skew(1deg); }
+    40% { filter: contrast(200%); transform: translate(2px); }
+    80% { filter: invert(0); transform: skew(-1deg); }
+}
+
 .scanlines {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
@@ -43,30 +80,7 @@ body.blood-mode .scanlines {
 .flash-active { animation: flash-anim 0.3s ease-out; }
 @keyframes flash-anim { 0% { opacity: 0.4; } 100% { opacity: 0; } }
 
-/* Menú de Dificultad */
-#difficulty-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: var(--dark); display: flex; justify-content: center; align-items: center; z-index: 300;
-}
-
-.menu-content {
-    text-align: center; border: 2px solid var(--cyan); padding: 40px;
-    background: rgba(0, 0, 0, 0.95); box-shadow: 0 0 30px var(--cyan);
-}
-
-.menu-content button {
-    display: block; width: 300px; margin: 15px auto;
-    background: transparent; border: 1px solid var(--cyan);
-    color: var(--cyan); padding: 15px; font-family: 'Orbitron';
-    cursor: pointer; transition: 0.3s;
-}
-
-.menu-content button:hover {
-    background: var(--cyan); color: var(--dark);
-    box-shadow: 0 0 20px var(--cyan);
-}
-
-/* Layout Principal */
+/* Layout */
 .main-wrapper {
     display: grid; grid-template-columns: 280px 1fr 280px;
     gap: 20px; width: 98vw; height: 95vh; margin: 2.5vh auto;
@@ -82,7 +96,6 @@ body.blood-mode .scanlines {
 .header {
     background: var(--cyan); color: var(--dark);
     font-family: 'Orbitron'; font-weight: bold; padding: 8px; text-align: center;
-    transition: background-color 0.5s ease;
 }
 
 .pixel-art { 
@@ -94,47 +107,30 @@ body.blood-mode .scanlines {
 .hp-fill { background: var(--cyan); height: 100%; width: 100%; transition: width 0.5s ease; }
 .hp-fill.player { background: var(--magenta); }
 
-/* Terminal Central */
+/* UI */
 #timer-ring { position: absolute; top: 15px; right: 25px; font-family: 'Orbitron'; font-size: 3rem; color: var(--magenta); z-index: 10; }
 #score-counter { position: absolute; top: 20px; left: 25px; font-family: 'Orbitron'; font-size: 1.5rem; z-index: 10; }
 
-#terminal-wrapper {
-    flex: 1; margin-top: 60px; padding: 0 20px; overflow-y: auto;
-}
+#terminal-wrapper { flex: 1; margin-top: 60px; padding: 0 20px; overflow-y: auto; }
+#terminal-output { font-size: 1.4rem; line-height: 1.5; display: flex; flex-direction: column; justify-content: flex-end; min-height: 100%; }
 
-#terminal-output {
-    font-size: 1.4rem; line-height: 1.5; display: flex; flex-direction: column; justify-content: flex-end; min-height: 100%;
-}
+.log-success { color: var(--green); }
+.log-error { color: var(--red); font-weight: bold; }
 
-.log-entry { margin-bottom: 8px; }
-.log-success { color: var(--green); text-shadow: 0 0 5px var(--green); }
-.log-error { color: var(--red); text-shadow: 0 0 5px var(--red); }
-.log-warning { color: #ffcc00; font-weight: bold; animation: pulse 1s infinite; }
-
-@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-/* Opciones */
-#options-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px;
-    background: rgba(0,0,0,0.5); border-top: 1px solid var(--cyan);
-}
-
-.opt-btn {
-    background: rgba(255, 0, 255, 0.05); border: 1px solid var(--magenta);
-    color: var(--magenta); padding: 18px; cursor: pointer;
-    font-family: 'VT323'; font-size: 1.3rem; transition: 0.2s;
-}
-
-.opt-btn:hover { background: var(--magenta); color: #fff; box-shadow: 0 0 15px var(--magenta); }
-
-.input-line { padding: 15px; border-top: 1px solid var(--cyan); display: flex; align-items: center; }
-#terminal-input { background: transparent; border: none; color: #fff; font-family: 'VT323'; font-size: 1.2rem; outline: none; width: 100%; }
+#options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; border-top: 1px solid var(--cyan); }
+.opt-btn { background: rgba(0,0,0,0.5); border: 1px solid var(--magenta); color: var(--magenta); padding: 18px; cursor: pointer; font-family: 'VT323'; font-size: 1.3rem; }
+.opt-btn:hover { background: var(--magenta); color: #fff; }
 
 .shake { animation: shake-anim 0.4s both; }
-@keyframes shake-anim { 
-    0% { transform: translate(0); }
-    25% { transform: translate(5px, 5px); }
-    50% { transform: translate(-5px, -5px); }
-    75% { transform: translate(5px, -5px); }
-    100% { transform: translate(0); }
+@keyframes shake-anim { 0%, 100% { transform: translate(0); } 25% { transform: translate(5px, 5px); } 50% { transform: translate(-5px, -5px); } }
+
+/* Glitch Text */
+.glitch-text { position: relative; display: inline-block; }
+.glitch-text::before, .glitch-text::after {
+    content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%;
 }
+.glitch-text::before { left: 2px; text-shadow: -2px 0 var(--magenta); animation: glitch-anim-1 2s infinite linear alternate-reverse; }
+.glitch-text::after { left: -2px; text-shadow: -2px 0 var(--cyan); animation: glitch-anim-2 3s infinite linear alternate-reverse; }
+
+@keyframes glitch-anim-1 { 0% { clip: rect(10px, 9999px, 40px, 0); } 100% { clip: rect(80px, 9999px, 100px, 0); } }
+@keyframes glitch-anim-2 { 0% { clip: rect(50px, 9999px, 70px, 0); } 100% { clip: rect(10px, 9999px, 30px, 0); } }
