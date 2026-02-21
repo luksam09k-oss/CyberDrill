@@ -2,6 +2,7 @@
     --cyan: #00f2ff;
     --magenta: #ff00ff;
     --green: #00ff66;
+    --red: #ff0033;
     --dark: #050508;
     --glass: rgba(0, 242, 255, 0.05);
 }
@@ -13,6 +14,18 @@ body {
     margin: 0;
     overflow: hidden;
     height: 100vh;
+    transition: background-color 0.5s ease;
+}
+
+/* MODO ALERTA ROJA */
+body.blood-mode {
+    --cyan: var(--red);
+    --glass: rgba(255, 0, 51, 0.1);
+    background-color: #1a0005;
+}
+
+body.blood-mode .scanlines {
+    background: linear-gradient(rgba(255, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.2) 50%);
 }
 
 /* Efectos de Pantalla */
@@ -63,45 +76,42 @@ body {
     background: var(--glass); border: 1px solid var(--cyan);
     display: flex; flex-direction: column; position: relative;
     overflow: hidden;
+    transition: all 0.5s ease;
 }
 
 .header {
     background: var(--cyan); color: var(--dark);
     font-family: 'Orbitron'; font-weight: bold; padding: 8px; text-align: center;
+    transition: background-color 0.5s ease;
 }
 
-.img-container { padding: 20px; text-align: center; }
-.pixel-art { width: 160px; height: 160px; border: 1px solid var(--magenta); background: #000; }
+.pixel-art { 
+    width: 160px; height: 160px; border: 1px solid var(--magenta); 
+    background: #000; transition: border-color 0.5s ease;
+}
 
-.hp-bg { background: #111; border: 1px solid var(--cyan); height: 20px; margin: 10px 0; position: relative; }
+.hp-bg { background: #111; border: 1px solid var(--cyan); height: 20px; margin: 10px 0; }
 .hp-fill { background: var(--cyan); height: 100%; width: 100%; transition: width 0.5s ease; }
 .hp-fill.player { background: var(--magenta); }
 
-/* Terminal Central Arreglada */
+/* Terminal Central */
 #timer-ring { position: absolute; top: 15px; right: 25px; font-family: 'Orbitron'; font-size: 3rem; color: var(--magenta); z-index: 10; }
 #score-counter { position: absolute; top: 20px; left: 25px; font-family: 'Orbitron'; font-size: 1.5rem; z-index: 10; }
 
 #terminal-wrapper {
-    flex: 1;
-    margin-top: 60px;
-    padding: 0 20px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--cyan) transparent;
+    flex: 1; margin-top: 60px; padding: 0 20px; overflow-y: auto;
 }
 
 #terminal-output {
-    font-size: 1.4rem;
-    line-height: 1.5;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    min-height: 100%;
+    font-size: 1.4rem; line-height: 1.5; display: flex; flex-direction: column; justify-content: flex-end; min-height: 100%;
 }
 
 .log-entry { margin-bottom: 8px; }
 .log-success { color: var(--green); text-shadow: 0 0 5px var(--green); }
-.log-error { color: var(--magenta); text-shadow: 0 0 5px var(--magenta); }
+.log-error { color: var(--red); text-shadow: 0 0 5px var(--red); }
+.log-warning { color: #ffcc00; font-weight: bold; animation: pulse 1s infinite; }
+
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
 /* Opciones */
 #options-grid {
