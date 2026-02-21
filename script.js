@@ -1,24 +1,24 @@
 const vocabulary = [
-    { q: "Software que se replica y daña archivos:", o: ["Firewall", "Virus", "VPN", "Cloud"], a: 1 },
-    { q: "Filtra el tráfico de red entrante:", o: ["Router", "Phishing", "Firewall", "Modem"], a: 2 },
-    { q: "Hacker ético que ayuda a empresas:", o: ["Black Hat", "Grey Hat", "White Hat", "Script Kiddie"], a: 2 },
-    { q: "Engaño por email para robar claves:", o: ["Phishing", "Spyware", "Trojan", "DDoS"], a: 0 },
-    { q: "Malware disfrazado de programa útil:", o: ["Worm", "Trojan", "Ransomware", "Adware"], a: 1 },
-    { q: "Secuestro de datos por rescate $$$:", o: ["Spam", "Ransomware", "Keylogger", "Botnet"], a: 1 },
-    { q: "Conexión cifrada punto a punto:", o: ["DNS", "VPN", "HTTP", "FTP"], a: 1 },
-    { q: "Ataque que satura un servidor:", o: ["DDoS", "SQLi", "XSS", "Brute Force"], a: 0 },
-    { q: "Usa scripts de otros sin saber programar:", o: ["Pro", "Blue Hat", "Script Kiddie", "Admin"], a: 2 },
-    { q: "Hackea por ideología política:", o: ["Spy", "Hacktivist", "Cracker", "Insider"], a: 1 },
-    { q: "Registra cada pulsación de tecla:", o: ["Adware", "Keylogger", "Cookies", "Rootkit"], a: 1 },
-    { q: "Red de dispositivos infectados (Zombies):", o: ["Botnet", "Mainframe", "Cluster", "Switch"], a: 0 },
-    { q: "Malware que se oculta en el inicio del SO:", o: ["BIOS", "Rootkit", "Firmware", "Kernel"], a: 1 },
-    { q: "Intento de adivinar claves probando todo:", o: ["SQLi", "Fuzzing", "Brute Force", "Spoofing"], a: 2 },
-    { q: "Suplantación de identidad (IP/DNS):", o: ["Spoofing", "Sniffing", "Cracking", "Dumping"], a: 0 },
-    { q: "Captura paquetes de datos en la red:", o: ["Sniffer", "Scanner", "Proxy", "Bridge"], a: 0 },
-    { q: "Pequeño archivo de rastreo web:", o: ["Script", "Cookie", "Pop-up", "Plugin"], a: 1 },
-    { q: "Vulnerabilidad no descubierta por el autor:", o: ["Zero-Day", "Patch", "Bug", "Exploit"], a: 0 },
-    { q: "Validación por dos métodos (SMS/App):", o: ["2FA", "HTTPS", "SSL", "SSO"], a: 0 },
-    { q: "Inyección de código malicioso en BD:", o: ["XSS", "SQLi", "CSRF", "MITM"], a: 1 }
+    { q: "Software that replicates and damages files:", o: ["Firewall", "Virus", "VPN", "Cloud"], a: 1 },
+    { q: "Filters incoming network traffic:", o: ["Router", "Phishing", "Firewall", "Modem"], a: 2 },
+    { q: "Ethical hacker who helps companies:", o: ["Black Hat", "Grey Hat", "White Hat", "Script Kiddie"], a: 2 },
+    { q: "Email scam to steal credentials:", o: ["Phishing", "Spyware", "Trojan", "DDoS"], a: 0 },
+    { q: "Malware disguised as useful software:", o: ["Worm", "Trojan", "Ransomware", "Adware"], a: 1 },
+    { q: "Data hijacking for a ransom $$$:", o: ["Spam", "Ransomware", "Keylogger", "Botnet"], a: 1 },
+    { q: "Encrypted point-to-point connection:", o: ["DNS", "VPN", "HTTP", "FTP"], a: 1 },
+    { q: "Attack that saturates a server:", o: ["DDoS", "SQLi", "XSS", "Brute Force"], a: 0 },
+    { q: "Uses others' scripts without knowing how to code:", o: ["Pro", "Blue Hat", "Script Kiddie", "Admin"], a: 2 },
+    { q: "Hacks for political or social ideology:", o: ["Spy", "Hacktivist", "Cracker", "Insider"], a: 1 },
+    { q: "Records every keystroke made by the user:", o: ["Adware", "Keylogger", "Cookies", "Rootkit"], a: 1 },
+    { q: "Network of infected devices (Zombies):", o: ["Botnet", "Mainframe", "Cluster", "Switch"], a: 0 },
+    { q: "Malware that hides in the OS boot process:", o: ["BIOS", "Rootkit", "Firmware", "Kernel"], a: 1 },
+    { q: "Attempt to guess passwords by trying everything:", o: ["SQLi", "Fuzzing", "Brute Force", "Spoofing"], a: 2 },
+    { q: "Identity theft (IP/DNS impersonation):", o: ["Spoofing", "Sniffing", "Cracking", "Dumping"], a: 0 },
+    { q: "Captures data packets on the network:", o: ["Sniffer", "Scanner", "Proxy", "Bridge"], a: 0 },
+    { q: "Small web tracking file:", o: ["Script", "Cookie", "Pop-up", "Plugin"], a: 1 },
+    { q: "Vulnerability not yet discovered by the author:", o: ["Zero-Day", "Patch", "Bug", "Exploit"], a: 0 },
+    { q: "Validation by two methods (SMS/App):", o: ["2FA", "HTTPS", "SSL", "SSO"], a: 0 },
+    { q: "Injection of malicious code into a DB:", o: ["XSS", "SQLi", "CSRF", "MITM"], a: 1 }
 ];
 
 // Gestión de Audio
@@ -56,14 +56,14 @@ let perfectBerserker = true;
 
 window.onload = () => {
     const savedScore = localStorage.getItem('cyberdrill_score') || 0;
-    document.getElementById('high-score-display').innerText = `RECORD_HISTÓRICO: ${savedScore}`;
+    document.getElementById('high-score-display').innerText = `HISTORICAL_RECORD: ${savedScore}`;
 };
 
 function startGame(mode) {
     document.getElementById('difficulty-overlay').style.display = 'none';
     document.getElementById('game-screen').style.display = 'grid';
     
-    playMusic('bg'); // Inicia música normal
+    playMusic('bg');
 
     config.mode = mode;
     if (mode === 'easy') {
@@ -98,7 +98,7 @@ function loadQuestion() {
     usedQuestions.push(qIdx);
     const qData = vocabulary[qIdx];
     
-    log(`${isVoid ? '[FATAL_ERR]: ' : (isOverload ? '[!] BERSERKER: ' : 'RETO: ')}${qData.q}`, 'sys');
+    log(`${isVoid ? '[FATAL_ERR]: ' : (isOverload ? '[!] BERSERKER: ' : 'CHALLENGE: ')}${qData.q}`, 'sys');
     
     const grid = document.getElementById('options-grid');
     grid.innerHTML = '';
@@ -109,14 +109,14 @@ function loadQuestion() {
         btn.innerText = opt;
         btn.onclick = () => {
             if (i === qData.a) {
-                log("INYECCIÓN EXITOSA.", "ok");
-                if (!isVoid) audio.correct.play().catch(() => {}); // Sin SFX en Void
+                log("SUCCESSFUL INJECTION.", "ok");
+                if (!isVoid) audio.correct.play().catch(() => {});
                 successEffect();
                 enemyHP -= (25 / config.enemyMult);
                 score += (isVoid ? 500 : (isOverload ? 200 : 100));
             } else {
-                log("DEFENSA ENEMIGA ACTIVA.", "err");
-                if (!isVoid) audio.wrong.play().catch(() => {}); // Sin SFX en Void
+                log("ENEMY DEFENSE ACTIVE.", "err");
+                if (!isVoid) audio.wrong.play().catch(() => {});
                 damageEffect();
                 playerRAM -= (isVoid ? 50 : (isOverload ? 25 : 15));
                 if (isOverload) perfectBerserker = false;
@@ -148,7 +148,7 @@ function startTimer() {
         timeLeft--;
         document.getElementById('timer-ring').innerText = timeLeft;
         if (timeLeft <= 0) {
-            log("TIMEOUT. Rastreo completado por el enemigo.", "err");
+            log("TIMEOUT. Tracking completed by enemy.", "err");
             if (!isVoid) audio.wrong.play().catch(() => {});
             damageEffect();
             playerRAM -= (isVoid ? 50 : (isOverload ? 30 : 20));
@@ -164,13 +164,13 @@ function activateOverload() {
     enemyHP = 100;
     config.enemyMult = 1.5;
     
-    playMusic('berserker'); // Música de Berserker
+    playMusic('berserker');
 
     document.getElementById('main-body').classList.add('blood-mode');
     document.getElementById('enemy-sprite').src = 'final.png';
     document.getElementById('user-sprite').src = 'scared.png';
     
-    log("!!! ERROR: NÚCLEO EN ESTADO BERSERKER !!!", "err");
+    log("!!! ERROR: CORE IN BERSERKER STATE !!!", "err");
     setTimeout(() => { updateBars(); loadQuestion(); }, 1500);
 }
 
@@ -180,7 +180,7 @@ function activateVoid() {
     enemyHP = 300;
     config.enemyMult = 2;
     
-    playMusic('void'); // Música del Vacío
+    playMusic('void');
 
     document.getElementById('main-body').className = 'void-mode';
     document.getElementById('enemy-sprite').src = 'secret.jpg';
@@ -192,8 +192,8 @@ function activateVoid() {
     document.getElementById('enemy-label').innerText = "VOID_ENTITY";
     document.getElementById('player-status').innerText = "BIOMETRICS: ???";
     
-    log("... EL SILENCIO ES ABSOLUTO ...", "ok");
-    log("FASE DE VACÍO INICIADA. NO HAY VUELTA ATRÁS.", "err");
+    log("... THE SILENCE IS ABSOLUTE ...", "ok");
+    log("VOID PHASE INITIATED. NO TURNING BACK.", "err");
     
     setTimeout(() => { updateBars(); loadQuestion(); }, 2000);
 }
@@ -202,7 +202,7 @@ function checkGameState() {
     updateBars();
     document.getElementById('score-counter').innerText = `PTS: ${score}`;
     
-    if (playerRAM <= 0) return endGame("CONEXIÓN_CORTADA: No queda nada de ti.");
+    if (playerRAM <= 0) return endGame("CONNECTION_TERMINATED: Nothing left of you.");
     
     if (enemyHP <= 0) {
         if (!isOverload && !isVoid && Math.random() < config.overloadProb) {
@@ -212,7 +212,7 @@ function checkGameState() {
             clearInterval(timer);
             activateVoid();
         } else {
-            endGame(isVoid ? "DIVINIDAD_ALCANZADA: Has hackeado el vacío." : "OBJETIVO_ELIMINADO: Sistema comprometido.");
+            endGame(isVoid ? "DIVINITY_REACHED: You have hacked the void." : "TARGET_ELIMINATED: System compromised.");
         }
     } else {
         loadQuestion();
@@ -233,7 +233,7 @@ function updateBars() {
 
 function endGame(msg) {
     clearInterval(timer);
-    stopAllMusic(); // Detener toda la música al final
+    stopAllMusic();
     const high = localStorage.getItem('cyberdrill_score') || 0;
     if (score > high) localStorage.setItem('cyberdrill_score', score);
     
@@ -243,7 +243,7 @@ function endGame(msg) {
             <div class="menu-content" style="border-color: ${color}; box-shadow: 0 0 30px ${color}">
                 <h1 style="color: ${color}; font-size: 2.5rem;">${msg}</h1>
                 <h2 style="color: #fff">SCORE: ${score}</h2>
-                <button onclick="location.reload()" style="border-color: ${color}; color: ${color}">REINICIAR REALIDAD</button>
+                <button onclick="location.reload()" style="border-color: ${color}; color: ${color}">RESTART REALITY</button>
             </div>
         </div>
     `;
