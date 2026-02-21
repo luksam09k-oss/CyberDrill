@@ -25,6 +25,8 @@ let playerRAM = 100, enemyHP = 100, score = 0, timer, timeLeft = 10;
 let config = { mode: 'normal', time: 10, enemyMult: 1, overloadProb: 0.4 };
 let usedQuestions = [];
 let isOverload = false;
+let isVoid = false;
+let perfectBerserker = true; // Racha perfecta en modo Berserker
 
 window.onload = () => {
     const savedScore = localStorage.getItem('cyberdrill_score') || 0;
@@ -37,13 +39,12 @@ function startGame(mode) {
     
     config.mode = mode;
     if (mode === 'easy') {
-        config.time = 12; config.enemyMult = 1; config.overloadProb = 0.1;
+        config.time = 12; config.overloadProb = 0.1;
     } else if (mode === 'normal') {
-        config.time = 10; config.enemyMult = 1; config.overloadProb = 0.4;
+        config.time = 10; config.overloadProb = 0.4;
     } else if (mode === 'hard') {
-        config.time = 8; config.enemyMult = 2; config.overloadProb = 0.8; // Probabilidad aumentada
-        playerRAM = 50;
-        enemyHP = 200;
+        config.time = 8; config.enemyMult = 2; config.overloadProb = 0.8;
+        playerRAM = 50; enemyHP = 200;
     }
     
     updateBars();
@@ -54,7 +55,7 @@ function log(msg, type) {
     const wrapper = document.getElementById('terminal-wrapper');
     const out = document.getElementById('terminal-output');
     const div = document.createElement('div');
-    div.className = `log-entry ${type === 'ok' ? 'log-success' : type === 'err' ? 'log-error' : type === 'warn' ? 'log-warning' : ''}`;
+    div.className = `log-entry ${type === 'ok' ? 'log-success' : type === 'err' ? 'log-error' : ''}`;
     div.innerText = `> ${msg}`;
     out.appendChild(div);
     wrapper.scrollTop = wrapper.scrollHeight;
@@ -65,14 +66,11 @@ function loadQuestion() {
     if (usedQuestions.length === vocabulary.length) usedQuestions = [];
     
     let qIdx;
-    do {
-        qIdx = Math.floor(Math.random() * vocabulary.length);
-    } while (usedQuestions.includes(qIdx));
-    
+    do { qIdx = Math.floor(Math.random() * vocabulary.length); } while (usedQuestions.includes(qIdx));
     usedQuestions.push(qIdx);
     const qData = vocabulary[qIdx];
     
-    log(`${isOverload ? '[!] EMERGENCIA: ' : 'NUEVO_RETO: '}${qData.q}`, 'sys');
+    log(`${isVoid ? '[FATAL_ERR]: ' : (isOverload ? '[!] BERSERKER: ' : 'RETO: ')}${qData.q}`, 'sys');
     
     const grid = document.getElementById('options-grid');
     grid.innerHTML = '';
@@ -83,21 +81,22 @@ function loadQuestion() {
         btn.innerText = opt;
         btn.onclick = () => {
             if (i === qData.a) {
-                log("ATAQUE EFECTIVO. Bypass confirmado.", "ok");
+                log("INYECCIÓN EXITOSA.", "ok");
                 successEffect();
                 enemyHP -= (25 / config.enemyMult);
-                score += (isOverload ? 200 : 100);
+                score += (isVoid ? 500 : (isOverload ? 200 : 100));
             } else {
-                log("FALLO CRÍTICO. Contraataque en curso.", "err");
+                log("DEFENSA ENEMIGA ACTIVA.", "err");
                 damageEffect();
-                playerRAM -= (isOverload ? 25 : 15);
+                playerRAM -= (isVoid ? 50 : (isOverload ? 25 : 15));
+                if (isOverload) perfectBerserker = false; // Adiós racha perfecta
             }
             checkGameState();
         };
         grid.appendChild(btn);
     });
     
-    timeLeft = isOverload ? 6 : config.time;
+    timeLeft = isVoid ? 4 : (isOverload ? 6 : config.time);
     startTimer();
 }
 
@@ -119,9 +118,10 @@ function startTimer() {
         timeLeft--;
         document.getElementById('timer-ring').innerText = timeLeft;
         if (timeLeft <= 0) {
-            log("TIMEOUT. El sistema te ha detectado.", "err");
+            log("TIMEOUT. Rastreo completado por el enemigo.", "err");
             damageEffect();
-            playerRAM -= (isOverload ? 30 : 20);
+            playerRAM -= (isVoid ? 50 : (isOverload ? 30 : 20));
+            if (isOverload) perfectBerserker = false;
             checkGameState();
         }
     }, 1000);
@@ -129,49 +129,55 @@ function startTimer() {
 
 function activateOverload() {
     isOverload = true;
+    perfectBerserker = true; // Empezamos a contar
     enemyHP = 100;
     config.enemyMult = 1.5;
     
     document.getElementById('main-body').classList.add('blood-mode');
-    
-    // Cambios de imagen
     document.getElementById('enemy-sprite').src = 'final.png';
-    document.getElementById('user-sprite').src = 'scared.png'; // Operador asustado
+    document.getElementById('user-sprite').src = 'scared.png';
     
-    // Fallbacks
-    document.getElementById('enemy-sprite').onerror = () => {
-        document.getElementById('enemy-sprite').src = 'https://via.placeholder.com/150/1a0005/ff0033?text=BOSS_CORE';
-    };
-    document.getElementById('user-sprite').onerror = () => {
-        document.getElementById('user-sprite').src = 'https://via.placeholder.com/150/1a0005/ff0033?text=PANIC';
-    };
+    log("!!! ERROR: NÚCLEO EN ESTADO BERSERKER !!!", "err");
+    setTimeout(() => { updateBars(); loadQuestion(); }, 1500);
+}
 
-    document.getElementById('enemy-status').innerText = "SISTEMA: SOBRECARGADO / BERSERKER";
-    document.getElementById('enemy-label').innerText = "NÚCLEO_CORRUPTO";
-    document.getElementById('player-status').innerText = "ESTADO: PÁNICO CRÍTICO";
+function activateVoid() {
+    isVoid = true;
+    isOverload = false;
+    enemyHP = 150;
+    config.enemyMult = 2;
     
-    log("!!! ADVERTENCIA: SOBRECARGA DEL NÚCLEO DETECTADA !!!", "warn");
-    log("ERROR: EL OPERADOR HA PERDIDO EL CONTROL.", "err");
+    document.getElementById('main-body').className = 'void-mode';
+    document.getElementById('enemy-sprite').src = 'secret.jpg';
+    document.getElementById('enemy-sprite').onerror = () => {
+        document.getElementById('enemy-sprite').src = 'https://via.placeholder.com/150/000000/ffffff?text=THE_VOID';
+    };
     
-    setTimeout(() => {
-        log("SISTEMA ENEMIGO REVIVIDO. TIEMPO DE RESPUESTA: 6s.", "err");
-        updateBars();
-        loadQuestion();
-    }, 1500);
+    document.getElementById('enemy-status').innerText = "SYSTEM_STATUS: [NULL]";
+    document.getElementById('enemy-label').innerText = "VOID_ENTITY";
+    document.getElementById('player-status').innerText = "BIOMETRICS: ???";
+    
+    log("... EL SILENCIO ES ABSOLUTO ...", "ok");
+    log("FASE DE VACÍO INICIADA. NO HAY VUELTA ATRÁS.", "err");
+    
+    setTimeout(() => { updateBars(); loadQuestion(); }, 2000);
 }
 
 function checkGameState() {
     updateBars();
     document.getElementById('score-counter').innerText = `PTS: ${score}`;
     
-    if (playerRAM <= 0) return endGame("CONEXIÓN_CORTADA: Tu hardware ha explotado.");
+    if (playerRAM <= 0) return endGame("CONEXIÓN_CORTADA: No queda nada de ti.");
     
     if (enemyHP <= 0) {
-        if (!isOverload && Math.random() < config.overloadProb) {
+        if (!isOverload && !isVoid && Math.random() < config.overloadProb) {
             clearInterval(timer);
             activateOverload();
+        } else if (isOverload && perfectBerserker) {
+            clearInterval(timer);
+            activateVoid();
         } else {
-            endGame(isOverload ? "NÚCLEO_EXTERMINADO: Eres el terror de los servidores." : "SERVIDOR_CONQUISTADO: Acceso garantizado.");
+            endGame(isVoid ? "DIVINIDAD_ALCANZADA: Has hackeado el vacío." : "OBJETIVO_ELIMINADO: Sistema comprometido.");
         }
     } else {
         loadQuestion();
@@ -179,7 +185,7 @@ function checkGameState() {
 }
 
 function updateBars() {
-    const maxE = (config.mode === 'hard' && !isOverload) ? 200 : 100;
+    const maxE = isVoid ? 150 : ((config.mode === 'hard' && !isOverload) ? 200 : 100);
     const currentMaxP = (config.mode === 'hard') ? 50 : 100;
     
     document.getElementById('enemy-hp').style.width = Math.max(0, (enemyHP / maxE) * 100) + "%";
@@ -191,12 +197,13 @@ function endGame(msg) {
     const high = localStorage.getItem('cyberdrill_score') || 0;
     if (score > high) localStorage.setItem('cyberdrill_score', score);
     
+    let color = isVoid ? '#ffffff' : (isOverload ? 'var(--red)' : 'var(--cyan)');
     document.body.innerHTML = `
-        <div id="difficulty-overlay">
-            <div class="menu-content" style="border-color: ${isOverload ? 'var(--red)' : 'var(--cyan)'}">
-                <h1 class="${playerRAM <= 0 ? 'log-error' : 'log-success'}" style="font-size: 2rem;">${msg}</h1>
-                <h2 style="color: var(--cyan)">PUNTUACIÓN FINAL: ${score}</h2>
-                <button onclick="location.reload()">REINICIAR SISTEMA</button>
+        <div id="difficulty-overlay" style="background: #000">
+            <div class="menu-content" style="border-color: ${color}; box-shadow: 0 0 30px ${color}">
+                <h1 style="color: ${color}; font-size: 2.5rem;">${msg}</h1>
+                <h2 style="color: #fff">SCORE: ${score}</h2>
+                <button onclick="location.reload()" style="border-color: ${color}; color: ${color}">REINICIAR REALIDAD</button>
             </div>
         </div>
     `;
