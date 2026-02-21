@@ -3,39 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBERDRILL v6.5 - Panic Mode</title>
+    <title>CYBERDRILL v7.0 - Void Protocol</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body id="main-body">
     <div class="scanlines"></div>
     <div id="flash-effect"></div>
+    <div id="glitch-overlay"></div>
 
     <div id="difficulty-overlay">
         <div class="menu-content">
-            <h1 class="glitch-text">CYBERDRILL_OS_V6.5</h1>
-            <p style="color: var(--cyan); margin-bottom: 20px;">SELECCIONA NIVEL DE INFILTRACIÓN:</p>
-            <button onclick="startGame('easy')">FÁCIL [LOW_SEC]</button>
-            <button onclick="startGame('normal')">NORMAL [STANDARD]</button>
-            <button onclick="startGame('hard')">DIFÍCIL [NIGHTMARE_80%_REVIVE]</button>
+            <h1 class="glitch-text" data-text="CYBERDRILL_EVOLUTION">CYBERDRILL_EVOLUTION</h1>
+            <p style="color: var(--cyan); margin-bottom: 20px;">SISTEMA LISTO PARA INFILTRACIÓN:</p>
+            <button onclick="startGame('easy')">FÁCIL [RECOLECCIÓN]</button>
+            <button onclick="startGame('normal')">NORMAL [INFILTRACIÓN]</button>
+            <button onclick="startGame('hard')">DIFÍCIL [SUICIDIO_DIGITAL]</button>
             <div id="high-score-display">RECORD_HISTÓRICO: 0</div>
         </div>
     </div>
 
     <div class="main-wrapper" id="game-screen" style="display: none;">
+        <!-- PANEL IZQUIERDO -->
         <aside class="panel side-panel" id="enemy-panel">
-            <div class="header">DATOS_DEL_OBJETIVO</div>
+            <div class="header" id="enemy-header">TARGET_ID</div>
             <div class="img-container">
                 <img src="server.png" alt="Server" class="pixel-art" id="enemy-sprite" onerror="this.src='https://via.placeholder.com/150/050508/00f2ff?text=SERVER'">
             </div>
             <div class="info-box">
-                <label id="enemy-label">SERVIDOR_EXTERNO</label>
+                <label id="enemy-label">EXTERNAL_NODE</label>
                 <div class="hp-bg"><div id="enemy-hp" class="hp-fill"></div></div>
-                <small id="enemy-status">SISTEMA: VULNERABLE</small>
+                <small id="enemy-status">STATUS: VULNERABLE</small>
             </div>
         </aside>
 
-        <main class="panel center-panel">
+        <!-- PANEL CENTRAL -->
+        <main class="panel center-panel" id="core-panel">
             <div id="timer-ring">10</div>
             <div id="score-counter">PTS: 0</div>
             <div id="terminal-wrapper">
@@ -43,20 +46,21 @@
             </div>
             <div id="options-grid"></div>
             <div class="input-line">
-                <span class="prompt">ROOT@USER:~$</span>
-                <input type="text" id="terminal-input" placeholder="Awaiting..." disabled>
+                <span class="prompt">SYSTEM@ROOT:~$</span>
+                <input type="text" id="terminal-input" placeholder="..." disabled>
             </div>
         </main>
 
-        <aside class="panel side-panel">
-            <div class="header">LOG_DEL_OPERADOR</div>
+        <!-- PANEL DERECHO -->
+        <aside class="panel side-panel" id="player-panel">
+            <div class="header">OPERATOR_BIO</div>
             <div class="img-container">
                 <img src="user.png" alt="Operator" class="pixel-art" id="user-sprite" onerror="this.src='https://via.placeholder.com/150/050508/ff00ff?text=USER'">
             </div>
             <div class="info-box">
-                <label>MEMORIA_RAM</label>
+                <label>LOCAL_INTEGRITY</label>
                 <div class="hp-bg"><div id="player-hp" class="hp-fill player"></div></div>
-                <small id="player-status">ESTADO: ESTABLE</small>
+                <small id="player-status">MEM_STATE: STABLE</small>
             </div>
         </aside>
     </div>
